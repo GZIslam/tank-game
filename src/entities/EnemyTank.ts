@@ -4,6 +4,7 @@ import ResourceManager from "../utils/ResourceManager";
 import GameScene from "../Scene";
 import ExplosionEffect from "../effects/ExplosionEffect";
 import { randomIntInRange } from "../utils/MathUtils";
+import PlayerTank from "./PlayerTank";
 
 class EnemyTank extends GameEntity {
     private _life = 100
@@ -78,13 +79,14 @@ class EnemyTank extends GameEntity {
         this._mesh.setRotationFromAxisAngle(new Vector3(0, 0, 1), this._rotation)
     }
 
-    public damage = (amount: number) => {
+    public damage = (amount: number, owner: PlayerTank) => {
         this._life -= amount
         if(this._life <= 0) {
             this._shouldDispose = true;
             const explision = new ExplosionEffect(this._mesh.position, 2)
             explision.load().then(() => {
                 GameScene.instance.addToScene(explision)
+                owner.setScore(owner.score + 1)
             })
         }
     }

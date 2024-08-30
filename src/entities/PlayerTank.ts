@@ -14,6 +14,7 @@ type KeyboardState = {
 
 class PlayerTank extends GameEntity {
     private _rotation: number = 0
+    private _score: number = 0
 
     private _keyboardState: KeyboardState = {
         LeftPressed: false,
@@ -70,6 +71,24 @@ class PlayerTank extends GameEntity {
         }
     }
 
+    public get score() {
+        return this._score
+    }
+
+    public setScore = (val: number) => {
+        this._score = val
+        GameScene.instance.setScore(this._score)
+    }
+
+    // public setScore = (prop: (v: number) => number | number) => {
+    //     if(typeof prop === "number" ) {
+    //         this._score = prop
+    //     } else {
+    //         this._score = prop(this._score)
+    //     }
+    //     GameScene.instance.setScore(this._score)
+    // }
+
     private shoot = async () => {
         const offset = new Vector3(
             Math.sin(this._rotation) * 0.45,
@@ -77,7 +96,7 @@ class PlayerTank extends GameEntity {
             0.5
         )
         const shootingPisition = this._mesh.position.clone().add(offset)
-        const bullet = new Bullet(shootingPisition, this._rotation)
+        const bullet = new Bullet(shootingPisition, this._rotation, this)
         await bullet.load()
         const shootEffect = new ShootEffect(shootingPisition, this._rotation)
         await shootEffect.load()

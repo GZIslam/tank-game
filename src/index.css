@@ -25,3 +25,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+#score {
+  position: absolute;
+  left: 5%;
+  top: 5%;
+  font-size: 40px;
+}

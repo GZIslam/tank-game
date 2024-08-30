@@ -3,12 +3,16 @@ import GameEntity from "./GameEntity"
 import GameScene from "../Scene"
 import ExplosionEffect from "../effects/ExplosionEffect"
 import EnemyTank from "./EnemyTank"
+import PlayerTank from "./PlayerTank"
 
 class Bullet extends GameEntity {
     private _angle: number
-    constructor(position: Vector3, angle: number) {
+    private _owner: PlayerTank
+
+    constructor(position: Vector3, angle: number, owner: PlayerTank) {
         super(position, "bullet")
         this._angle = angle
+        this._owner = owner
     }
 
     public load = async () => {
@@ -46,7 +50,7 @@ class Bullet extends GameEntity {
 
             const enemies = colliders.filter(c => c.entityType === "enemy")
             if(enemies.length) {
-                (enemies[0] as EnemyTank).damage(20)
+                (enemies[0] as EnemyTank).damage(20, this._owner)
             }
         }
     }

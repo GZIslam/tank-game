@@ -65,6 +65,8 @@ class GameScene {
         const playerTank = new PlayerTank(new Vector3(7, 7, 0))
         this._gameEntities.push(playerTank)
 
+        this.setScore(playerTank.score)
+
         const enemy = new EnemyTank(new Vector3(
             Math.floor(Math.random() * 12) + 1,
             Math.floor(Math.random() * 12) + 1,
@@ -73,6 +75,14 @@ class GameScene {
         this._gameEntities.push(enemy)
 
         this.createWalls()
+    }
+
+    public setScore = (val: number) => {
+        const targetElement = document.querySelector<HTMLDivElement>("#score")
+        if(!targetElement) {
+            throw "Cant find score element!"
+        }
+        targetElement.innerText = `${val}`
     }
 
     private createWalls = () => {
