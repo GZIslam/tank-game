@@ -7,10 +7,12 @@ import PlayerTank from "./PlayerTank"
 
 class Bullet extends GameEntity {
     private _angle: number
-    private _owner: PlayerTank
+    private _owner: PlayerTank | EnemyTank
 
-    constructor(position: Vector3, angle: number, owner: PlayerTank) {
-        super(position, "bullet")
+    readonly entityType = "bullet"
+
+    constructor(position: Vector3, angle: number, owner: PlayerTank | EnemyTank) {
+        super(position)
         this._angle = angle
         this._owner = owner
     }
@@ -39,7 +41,11 @@ class Bullet extends GameEntity {
         )
         this._mesh.position.add(computedMovement)
 
-        const colliders = GameScene.instance.gameEntities.filter(c => c.collider && c !== this && c.entityType !== "player" && c.collider.intersectsSphere(this._collider as Sphere))
+        const colliders = GameScene.instance.gameEntities.filter(c => 
+            c.collider &&
+            c !== this &&
+            c.entityType !== this._owner.entityType &&
+            c.collider.intersectsSphere(this._collider as Sphere))
 
         if(colliders.length) {
             this._shouldDispose = true
@@ -47,10 +53,9 @@ class Bullet extends GameEntity {
             explision.load().then(() => {
                 GameScene.instance.addToScene(explision)
             })
-
-            const enemies = colliders.filter(c => c.entityType === "enemy")
+            const enemies = colliders.filter(c => c.entityType !== this._owner.entityType)
             if(enemies.length) {
-                (enemies[0] as EnemyTank).damage(20, this._owner)
+                enemies[0].damage(20, this._owner)
             }
         }
     }

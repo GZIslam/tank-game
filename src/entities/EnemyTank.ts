@@ -1,18 +1,23 @@
-import { Box3, Material, Mesh, MeshStandardMaterial, Sphere, Vector3 } from "three";
-import GameEntity from "./GameEntity";
-import ResourceManager from "../utils/ResourceManager";
-import GameScene from "../Scene";
-import ExplosionEffect from "../effects/ExplosionEffect";
-import { randomIntInRange } from "../utils/MathUtils";
-import PlayerTank from "./PlayerTank";
+import { Box3, Material, Mesh, MeshStandardMaterial, Sphere, Vector3 } from "three"
+import GameEntity from "./GameEntity"
+import ResourceManager from "../utils/ResourceManager"
+import GameScene from "../Scene"
+import ExplosionEffect from "../effects/ExplosionEffect"
+import { randomIntInRange } from "../utils/MathUtils"
+import PlayerTank from "./PlayerTank"
+import Bullet from "./Bullet"
+import ShootEffect from "../effects/ShootEffect"
 
 class EnemyTank extends GameEntity {
     private _life = 100
     private _rotation: number
     private _moveSpeed = 1
+    private _lastShoot = 0
+
+    readonly entityType = "enemy"
 
     constructor(position: Vector3) {
-        super(position, "enemy")
+        super(position)
         this._rotation = Math.floor(Math.random() * Math.PI * 2)
     }
 
@@ -55,6 +60,23 @@ class EnemyTank extends GameEntity {
         this._collider = collider
     }
 
+    private shoot = async () => {
+        const offset = new Vector3(
+            Math.sin(this._rotation) * 0.45,
+            -Math.cos(this._rotation) * 0.45,
+            0.5
+        )
+        const shootingPisition = this._mesh.position.clone().add(offset)
+        const bullet = new Bullet(shootingPisition, this._rotation, this)
+        await bullet.load()
+        const shootEffect = new ShootEffect(shootingPisition, this._rotation)
+        await shootEffect.load()
+        GameScene.instance.addToScene(shootEffect)
+        GameScene.instance.addToScene(bullet)
+    }
+
+    public setScore = () => {}
+
     public update = (deltaT: number) => {
         const computedMovement = new Vector3(
             this._moveSpeed * deltaT * Math.sin(this._rotation),
@@ -68,10 +90,20 @@ class EnemyTank extends GameEntity {
         )
         testingSphere.center.add(computedMovement)
 
-        const colliders = GameScene.instance.gameEntities.filter(c => c !== this && c.collider && c.collider!.intersectsSphere(testingSphere) && c.entityType !== "bullet")
+        const colliders = GameScene.instance.gameEntities.filter(c =>
+            c !== this &&
+            c.collider &&
+            c.collider!.intersectsSphere(testingSphere) &&
+            c.entityType !== "bullet"
+        )
         if(colliders.length) {
             this._rotation = Math.floor(Math.random() * Math.PI * 2)
             return
+        }
+        this._lastShoot += deltaT
+        if(this._lastShoot > 3) {
+            this.shoot()
+            this._lastShoot = 0
         }
 
         this._mesh.position.add(computedMovement);
@@ -79,14 +111,16 @@ class EnemyTank extends GameEntity {
         this._mesh.setRotationFromAxisAngle(new Vector3(0, 0, 1), this._rotation)
     }
 
-    public damage = (amount: number, owner: PlayerTank) => {
+    public damage = (amount: number, owner: PlayerTank | EnemyTank) => {
         this._life -= amount
         if(this._life <= 0) {
-            this._shouldDispose = true;
+            this._shouldDispose = true
             const explision = new ExplosionEffect(this._mesh.position, 2)
             explision.load().then(() => {
                 GameScene.instance.addToScene(explision)
-                owner.setScore(owner.score + 1)
+                if(owner.entityType === "player") {
+                    owner.setScore(owner.score + 1)
+                }
             })
         }
     }
@@ -99,12 +133,29 @@ class EnemyTank extends GameEntity {
         })
         // const count = Math.floor(Math.random() * 4) + 1;
         // for(let i = 0; i < count; i++) {
-            const enemy = new EnemyTank(new Vector3(
-                [randomIntInRange(2, 6), randomIntInRange(8, 12)][Math.random() > 0.5 ? 0 : 1],
-                [randomIntInRange(2, 6), randomIntInRange(8, 12)][Math.random() > 0.5 ? 0 : 1],
-                0
-            ))
-            enemy.load().then(() => GameScene.instance.addToScene(enemy))
+        let x, y;
+        while(!x && !y) {
+            const a = randomIntInRange(2, 12)
+            const b = randomIntInRange(2, 12)
+            const c = GameScene.instance.gameEntities.filter(e => {
+                if(e.entityType == "enemy" || e.entityType == "player") {
+                    const distance = Math.hypot(a - e.mesh.position.x,  b - e.mesh.position.y)
+                    return distance < 2
+                }
+                return false
+            })
+
+            if(!c.length) {
+                x = a
+                y = b
+            }
+        }
+        const enemy = new EnemyTank(new Vector3(
+            x,
+            y,
+            0
+        ))
+        enemy.load().then(() => GameScene.instance.addToScene(enemy))
         // }
     }
 }

@@ -1,6 +1,8 @@
 import { Box3, Mesh, Sphere, Vector3 } from "three"
+import PlayerTank from "./PlayerTank"
+import EnemyTank from "./EnemyTank"
 
-type EntityType = "general" | "player" | "bullet" | "enemy"
+// type EntityType = "general" | "player" | "bullet" | "enemy"
 
 abstract class GameEntity {
     protected _position: Vector3
@@ -14,10 +16,7 @@ abstract class GameEntity {
         return this._collider
     }
 
-    protected _entityType: EntityType
-    public get entityType() {
-        return this._entityType
-    }
+    abstract readonly entityType : unknown
 
     // flag to be disposed
     protected _shouldDispose = false
@@ -25,8 +24,7 @@ abstract class GameEntity {
         return this._shouldDispose
     }
 
-    constructor(position: Vector3, entityType: EntityType = "general") {
-        this._entityType = entityType
+    constructor(position: Vector3) {
         this._position = position
         this._mesh.position.set(
             this._position.x,
@@ -34,7 +32,7 @@ abstract class GameEntity {
             this._position.z,
         )
     }
-
+    public damage = (_val: number, _target: PlayerTank | EnemyTank) => {}
     public load = async () => {}
     public update = (_deltaT: number) => {}
     // before disposing

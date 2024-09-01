@@ -3,6 +3,7 @@ import GameEntity from "../entities/GameEntity"
 import ResourceManager from "../utils/ResourceManager"
 
 class Wall extends GameEntity {
+    readonly entityType: unknown
     constructor(position: Vector3) {
         super(position)
     }

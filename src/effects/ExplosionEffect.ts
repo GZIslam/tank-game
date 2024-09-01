@@ -7,6 +7,7 @@ class ExplosionEffect extends GameEntity {
     private _effectDuration = 0.5
     private _currentDuration: number
     private _fireMesh: Mesh = new Mesh()
+    readonly entityType: unknown
 
     constructor(position: Vector3, size: number) {
         super(position)

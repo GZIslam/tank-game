@@ -16,6 +16,8 @@ class PlayerTank extends GameEntity {
     private _rotation: number = 0
     private _score: number = 0
 
+    readonly entityType = "player" 
+
     private _keyboardState: KeyboardState = {
         LeftPressed: false,
         RightPressed: false,
@@ -24,7 +26,7 @@ class PlayerTank extends GameEntity {
     }
 
     constructor(position: Vector3) {
-        super(position, "player")
+        super(position)
 
         window.addEventListener("keydown", this.handleKeyDown)
         window.addEventListener("keyup", this.handleKeyUp)

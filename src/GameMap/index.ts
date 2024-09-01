@@ -3,6 +3,7 @@ import GameEntity from "../entities/GameEntity"
 import ResourceManager from "../utils/ResourceManager"
 
 class MapTile extends GameEntity {
+    readonly entityType: unknown
     constructor(position: Vector3) {
         super(position)
     }
@@ -24,6 +25,7 @@ class MapTile extends GameEntity {
 }
 
 class GameMap extends GameEntity {
+    readonly entityType: unknown
     private _size: number
     private _tiles: MapTile[] = []
     constructor(position: Vector3, size: number) {

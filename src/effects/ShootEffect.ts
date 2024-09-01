@@ -8,6 +8,7 @@ class ShootEffect extends GameEntity {
     private _smoke = new Mesh()
     private _size = 0.1
     private _effectDuration = 1
+    readonly entityType: unknown
 
     constructor(position: Vector3, angle: number){
         super(position)
